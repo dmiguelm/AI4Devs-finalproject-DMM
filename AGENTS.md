@@ -1,7 +1,7 @@
 # Realista — Agent Guidance
 
 ## Project Status
-Greenfield project. Specification phase. See `specs/001-realista-mvp/spec.md`.
+MVP complete. Final delivery phase. Deployed on Railway. See `specs/001-realista-mvp/spec.md`.
 
 ## Stack
 - **Frontend:** SvelteKit + Vite + PWA (mobile-first SPA)
@@ -9,7 +9,7 @@ Greenfield project. Specification phase. See `specs/001-realista-mvp/spec.md`.
 - **Database:** PostgreSQL + Prisma ORM
 - **Analysis:** LLM system prompt (primary, via OpenRouter) → manual text paste (fallback)
 - **Testing:** Vitest (unit + integration), Playwright (E2E)
-- **Deployment:** TBD (Vercel/Railway candidates)
+- **Deployment:** Railway (backend + frontend + PostgreSQL)
 
 ## Architecture
 Hexagonal + DDD tactical. Domain has zero framework dependencies.
@@ -83,9 +83,9 @@ specs/
     ├── data-model.md          # Prisma models + value objects
     ├── contracts/             # API design
     ├── research.md            # 8 technical decisions
-    └── tasks.md               # 127 tasks, 8 phases
+    └── tasks.md               # 127 tasks, 9 phases
 docs/
-├── domain-events.md           # 16 domain events identified
+├── domain-events.md           # 20+ domain events identified
 └── adr/                       # Architecture Decision Records
     ├── 001-hexagonal.md
     ├── 002-avena-score.md          # (deprecated — see ADR-004)

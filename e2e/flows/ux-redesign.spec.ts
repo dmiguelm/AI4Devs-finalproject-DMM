@@ -4,7 +4,7 @@ test.describe('UX redesign', () => {
   test('landing visible en /', async ({ page }) => {
     await page.goto('/');
     await expect(page.getByRole('heading', { name: /ojos abiertos/i })).toBeVisible();
-    await expect(page.getByRole('link', { name: /Pon a prueba tu casa/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /Analizar un anuncio/i })).toBeVisible();
   });
 
   test('header sticky con logo', async ({ page }) => {
@@ -14,11 +14,11 @@ test.describe('UX redesign', () => {
     await expect(header.getByText('Realista')).toBeVisible();
   });
 
-  test('process stepper muestra 4 pasos', async ({ page }) => {
+  test('process stepper muestra 3 pasos', async ({ page }) => {
     await page.goto('/listing-lens');
     const stepper = page.locator('nav[aria-label="Pasos del proceso"]');
     await expect(stepper).toBeVisible();
-    await expect(stepper.locator('[data-step-id]')).toHaveCount(4);
+    await expect(stepper.locator('[data-step-id]')).toHaveCount(3);
   });
 
   test('listing-lens tiene tabs URL/Texto', async ({ page }) => {

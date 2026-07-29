@@ -10,23 +10,19 @@
   const STEPS = [
     { id: 'listing', label: 'Anuncio', href: '/listing-lens' },
     { id: 'mortgage', label: 'Hipoteca', href: '/mortgage-compass' },
-    { id: 'timeline', label: 'Cronograma', href: '/timeline' },
-    { id: 'checklist', label: 'Checklist', href: '/checklist' },
+    { id: 'timeline', label: 'Proceso', href: '/timeline' },
   ];
 
   const PATH_TO_STEP: Record<string, string> = {
     '/listing-lens': 'listing',
     '/mortgage-compass': 'mortgage',
     '/timeline': 'timeline',
-    '/checklist': 'checklist',
   };
 
   const ROUTES_WITH_STEPPER = new Set([
-    '/mi-proceso',
     '/listing-lens',
     '/mortgage-compass',
     '/timeline',
-    '/checklist',
   ]);
 
   $: currentStep = PATH_TO_STEP[$page.url.pathname] ?? 'listing';

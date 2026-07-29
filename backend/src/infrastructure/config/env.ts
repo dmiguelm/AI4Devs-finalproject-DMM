@@ -7,8 +7,13 @@ const envSchema = z.object({
   FRONTEND_URL: z.string().url().default('http://localhost:5173'),
   LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
 
-  OPENROUTER_API_KEY: z.string().min(20, 'OPENROUTER_API_KEY must be set'),
+  OPENROUTER_API_KEY: z.string().optional(),
   OPENROUTER_MODEL: z.string().default('anthropic/claude-3.5-sonnet'),
+
+  LLM_PROVIDER: z.enum(['openrouter', 'opencode-go']).default('openrouter'),
+
+  OPENCODE_GO_API_KEY: z.string().optional(),
+  OPENCODE_GO_MODEL: z.string().default('deepseek-v4-flash'),
 
   RATE_LIMIT_PER_DAY: z.coerce.number().int().positive().default(20),
 
@@ -27,7 +32,7 @@ const envSchema = z.object({
   // Playwright headless-browser adapter (DataDome bypass)
   PLAYWRIGHT_ENABLED: z
     .enum(['true', 'false'])
-    .default('true')
+    .default('false')
     .transform((v) => v === 'true'),
   PLAYWRIGHT_POOL_SIZE: z.coerce.number().int().positive().default(1),
   PLAYWRIGHT_BROWSER_TIMEOUT_MS: z.coerce.number().int().positive().default(15_000),
@@ -49,4 +54,10 @@ function loadEnv(): Env {
   return result.data;
 }
 
-export const env: Env = loadEnv();
+const rawEnv = loadEnv();
+
+export const env = Object.assign(rawEnv, {
+  get IS_TEST(): boolean {
+    return process.env.VITEST === 'true' || (process.env.NODE_ENV || 'development') === 'test';
+  },
+}) as Env & { IS_TEST: boolean };

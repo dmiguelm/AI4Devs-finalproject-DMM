@@ -23,20 +23,22 @@ describe('PurchaseProcessAggregator', () => {
     expect(result).not.toBeNull();
     expect(result!.hiddenCosts.total).toBeGreaterThan(0);
     expect(result!.amortizationScenarios).toHaveLength(4);
-    expect(result!.amortizationScenarios.map((s) => s.name)).toEqual([
-      'baseline', 'light', 'moderate', 'aggressive',
-    ]);
+    expect(result!.amortizationScenarios[0].name).toBe('Sin amortizar');
+    expect(result!.amortizationScenarios[1].name).toContain('cuota');
+    expect(result!.amortizationScenarios[2].name).toContain('cuota');
+    expect(result!.amortizationScenarios[3].name).toContain('cuota');
     expect(result!.investmentScenarios).toHaveLength(3);
     expect(result!.investmentScenarios.map((s) => s.name)).toEqual([
-      'conservative', 'moderate', 'aggressive',
+      'conservador (4%)', 'moderado (6%)', 'agresivo (8%)',
     ]);
   });
 
-  it('computes monthly payment for 200k @ 3.5% over 30yr between 800-1000€', () => {
+  it('computes loan amount and monthly payment (propertyPrice - savings)', () => {
     const result = agg.compute(200_000, profile);
+    expect(result!.loanAmount).toBe(155_000);
     const baseline = result!.amortizationScenarios[0];
-    expect(baseline.monthlyPayment).toBeGreaterThan(800);
-    expect(baseline.monthlyPayment).toBeLessThan(1000);
+    expect(baseline.monthlyPayment).toBeGreaterThan(600);
+    expect(baseline.monthlyPayment).toBeLessThan(750);
   });
 
   it('totalCash = propertyPrice + hiddenCosts.total', () => {

@@ -9,6 +9,7 @@
 6. [Tickets de trabajo](#6-tickets-de-trabajo)
 7. [Pull requests](#7-pull-requests)
 8. [AI Engineering Setup](#8-ai-engineering-setup)
+9. [Capturas del sistema](#9-capturas-del-sistema)
 
 ---
 
@@ -28,11 +29,15 @@ Asistente educativo con IA para compradores primerizos de vivienda en España. A
 
 ### **0.4. URL del proyecto:**
 
-> TBD — Pendiente de despliegue (planificado para la Entrega Final, 29 Julio). El proyecto es 100% funcional en local con `docker compose up -d && npm run dev`.
+> Desplegado en Railway:
+> - **Frontend PWA:** `https://realista.up.railway.app`
+> - **Backend API:** `https://realista-api.up.railway.app`
+>
+> **Instrucciones locales:** El proyecto es 100% funcional en local con `docker compose up -d && npm install && npm run db:migrate -w backend && npm run dev`. Ver [Despliegue](#29-despliegue-en-railway) para instrucciones de deploy. Si necesitas desplegar tu propia instancia, consulta la sección de despliegue.
 
 ### 0.5. URL o archivo comprimido del repositorio
 
-`https://github.com/dmiguelm/AI4Devs-finalproject-DMM` (rama `feature-entrega1-DMM` para Entrega 1, `feature-entrega2-DMM` para Entrega 2, `finalproject-DMM` para Entrega final)
+`https://github.com/dmiguelm/AI4Devs-finalproject-DMM` (rama `finalproject-DMM` para la Entrega Final)
 
 ---
 
@@ -58,8 +63,7 @@ Acompañar al comprador primerizo de vivienda en España con tres herramientas q
 | Mortgage Compass | Perfil financiero → gastos ocultos → simulador de amortización vs inversión → narrativa educativa + **gráfico visual** comparativo | 🥇 Must-Have |
 | Dashboard | Historial de análisis, perfil financiero, **vista agregada en 1 llamada**, **diff de re-análisis**, acceso a herramientas | 🥇 Must-Have |
 | **Negotiation Assistant** | Tras el análisis, genera **5-8 preguntas concretas** para hacer al inmobiliario, basadas en las red flags detectadas | 🔶 Should-Have |
-| Cronograma interactivo | Línea temporal 60-90 días del proceso de compra (arras → escritura), filtrada por `currentStage` | 🔶 Should-Have |
-| Checklist documental | Documentos por etapa, progreso, **sugerencia de avance de etapa** al completar | 🔶 Should-Have |
+| Proceso de compra | Cronograma visual con hitos + checklist documental por etapa. Progreso por fase, documentos necesarios, fechas estimadas | 🔶 Should-Have |
 
 ### **1.3. Diseño y experiencia de usuario:**
 
@@ -67,7 +71,7 @@ Interfaz mobile-first (375px+) desarrollada con SvelteKit. PWA instalable con na
 
 ### **1.4. Instrucciones de instalación:**
 
-> **Estado actual (Entrega 2 — código MVP + AI engineering):** el proyecto está scaffolded y funcional en local. Ver la [sección 8](#8-ai-engineering-setup) para el detalle de los componentes de IA y [`.opencode/harness/run-locally.md`](.opencode/harness/run-locally.md) para el setup paso a paso.
+> **Estado actual (Entrega Final):** el proyecto está completo y funcional, desplegado en Railway. Ver la [sección 8](#8-ai-engineering-setup) para el detalle de los componentes de IA y [`.opencode/harness/run-locally.md`](.opencode/harness/run-locally.md) para el setup paso a paso.
 
 **Quickstart:**
 
@@ -75,7 +79,7 @@ Interfaz mobile-first (375px+) desarrollada con SvelteKit. PWA instalable con na
 # 1. Clonar y entrar en la rama
 git clone https://github.com/dmiguelm/AI4Devs-finalproject-DMM.git
 cd AI4Devs-finalproject-DMM
-git checkout feature-entrega2-DMM
+git checkout finalproject-DMM
 
 # 2. Configurar entorno
 cp .env.example .env
@@ -127,10 +131,8 @@ Stack: SvelteKit (PWA) + Node.js/Express + TypeScript + PostgreSQL + Prisma + Op
 │                                                              │
 │  OpenRouterAdapter        → LLM gateway (análisis semántico) │
 │  CheerioAdapter           → HTML parsing server-side         │
-│  DeclaredLocationAdapter  → Extracción de dirección del HTML │
 │  GeocodingAdapter         → Nominatim OSM (coordenadas GPS)  │
 │  CatastroAdapter          → API Sede Electrónica del Catastro│
-│  MiraTuZonaAdapter        → Enlace contextual por barrio     │
 └─────────────────────────────────────────────────────────────┘
 
 ┌──────────┐     ┌──────────────────┐     ┌──────────────────┐
@@ -179,9 +181,8 @@ backend/
 │   ├── adapters/         # Implementaciones de puertos
 │   │   ├── openrouter/   # OpenRouterAdapter (análisis LLM)
 │   │   ├── cheerio/      # CheerioAdapter (parseo HTML)
-│   │   ├── location/     # DeclaredLocationAdapter, GeocodingAdapter
+│   │   ├── location/     # GeocodingAdapter (Nominatim)
 │   │   ├── catastro/     # CatastroAdapter (API catastral)
-│   │   └── miratuzona/   # MiraTuZonaAdapter (enlace contextual)
 │   ├── api/              # Express routes, controllers, middleware
 │   ├── infrastructure/   # Prisma schema, config, constants
 │   └── index.ts
@@ -190,11 +191,11 @@ backend/
 frontend/
 ├── src/
 │   ├── routes/           # SvelteKit file-based routing
-│   │   ├── +page.svelte  # Dashboard
+│   │   ├── +page.svelte  # Landing
+│   │   ├── mi-proceso/    # Dashboard / resumen de proceso
 │   │   ├── listing-lens/ # Análisis de anuncios
 │   │   ├── mortgage-compass/ # Simulador hipotecario
-│   │   ├── timeline/     # Cronograma interactivo
-│   │   ├── checklist/    # Checklist documental
+│   │   ├── timeline/     # Proceso de compra (cronograma + checklist unificado)
 │   │   └── +layout.svelte
 │   ├── lib/              # Stores, API client, utils
 │   └── app.css
@@ -212,7 +213,7 @@ docs/                     # Constitución, ADRs y eventos de dominio
 
 **CI/CD:** GitHub Actions operativo en `.github/workflows/ci.yml` — 3 jobs (backend, frontend, E2E) con PostgreSQL service. Pipeline: lint → typecheck → tests unitarios → coverage → hexagonal-check → E2E. Triggers en push y PR a `main` y `feature-entrega2-DMM`.
 
-**Despliegue:** TBD — planificado para la Entrega Final. Candidatos: Railway/Render (backend + PostgreSQL) y Vercel (frontend PWA estática).
+**Despliegue:** Railway — dos servicios Node.js (backend Express + frontend SvelteKit adapter-node) + PostgreSQL plugin. CI/CD con GitHub Actions operativo.
 
 ### **2.5. Seguridad**
 
@@ -228,15 +229,75 @@ docs/                     # Constitución, ADRs y eventos de dominio
 
 | Suite | Framework | Tests | Estado |
 |-------|-----------|-------|--------|
-| Backend unitarios | Vitest | 92 tests (22 files) | ✅ Todos pasando |
-| Backend integración | Vitest + supertest | 7 tests (1 file) | ✅ Todos pasando |
-| Frontend unitarios | Vitest + happy-dom | 51 tests (12 files) | ✅ Todos pasando |
-| E2E | Playwright | 7 tests (4 flows) | ✅ Todos pasando |
+| Backend (dominio + adaptadores + integración + contrato + middleware) | Vitest + supertest | 122 tests (27 files) | ✅ Todos pasando |
+| Frontend (componentes + API + utilidades) | Vitest + happy-dom | 51 tests (12 files) | ✅ Todos pasando |
+| E2E (full-flow + listing-lens + mortgage-compass + UX) | Playwright | 13 tests (4 flows) | ✅ Todos pasando |
+| **Total** | | **186 tests** (43 files) | ✅ Todos pasando |
 
-- **Backend dominio (~20 tests):** TransparencyScore, RedFlags, FinancialProfile, Coordinates, SnapshotHash, HiddenCosts, AmortizationCalculator, InvestmentCalculator, NarrativeGenerator, ChecklistTemplate, DiffService, AnalyzeListingUseCase.diff, PurchaseProcessAggregator, NegotiationPointsService. **Adaptadores (~10 tests):** CheerioAdapter (port + headers + retry), PlaywrightAdapter, ChainedFetchAdapter, BrowserPool, OpenRouterAdapter, xmlParser. **Integración (7 tests):** Dashboard (estado vacío + activo) y Listings (analyze + validación + GET por id). Cobertura configurada al 80% en capa de dominio.
-- **Frontend:** componentes (Header, Logo, LandingHero, ProcessStepper, ListingTabs, LandingStepper, RedFlagCard, DiffBadge) + API client (streamingClient, crossModuleApiError) + utilidades (format, session). Entorno happy-dom.
-- **E2E:** full-flow (4 tests), listing-lens (1 test), mortgage-compass (2 tests), UX redesign (1 test). Ejecutados con Playwright + Chromium.
-- CI ejecuta `test:all` + `test:coverage` + `hexagonal-check` en cada push.
+- **Backend dominio:** TransparencyScore, RedFlags, FinancialProfile, Coordinates, SnapshotHash, HiddenCosts, AmortizationCalculator, InvestmentCalculator, NarrativeGenerator, ChecklistTemplate, DiffService, AnalyzeListingUseCase (core + diff), PurchaseProcessAggregator, NegotiationPointsService. **Adaptadores:** CheerioAdapter (port + headers + retry), PlaywrightAdapter, ChainedFetchAdapter, BrowserPool, OpenRouterAdapter, xmlParser. **Middleware:** RateLimiter. **Integración:** Dashboard (estado vacío + activo) y Listings (analyze + validación + GET por id + negotiation-points). Cobertura configurada al 80% en capa de dominio.
+- **Frontend:** componentes (Header, Logo, LandingHero, ProcessStepper, ListingTabs, LandingStepper, RedFlagCard, DiffBadge) + API client (streamingClient, crossModuleApiError) + utilidades (format, session). Entorno happy-dom. Cobertura configurada.
+- **E2E:** full-flow (4 tests), listing-lens (1 test), mortgage-compass (2 tests), UX redesign (6 tests). Ejecutados con Playwright + Chromium.
+- CI ejecuta `lint` → `typecheck` → `test:all` → `test:coverage` → `hexagonal-check` → `build` (backend + frontend) en cada push. El job E2E construye y arranca ambos servidores contra PostgreSQL antes de ejecutar Playwright.
+
+### **2.7. Despliegue en Railway**
+
+#### Arquitectura de despliegue
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                        Railway                          │
+│                                                         │
+│  ┌─────────────────────┐  ┌──────────────────────────┐ │
+│  │ realista-api          │  │ realista                  │ │
+│  │ (Node.js + Express)  │  │ (SvelteKit adapter-node) │ │
+│  │ PORT=3001            │  │ PORT=3000                │ │
+│  └──────────┬──────────┘  └──────────────────────────┘ │
+│             │                                           │
+│  ┌──────────▼──────────┐                               │
+│  │ PostgreSQL 16       │  (Railway plugin)              │
+│  │ DATABASE_URL        │                                │
+│  └─────────────────────┘                               │
+└─────────────────────────────────────────────────────────┘
+```
+
+#### Variables de entorno necesarias en Railway
+
+| Variable | Servicio | Valor |
+|----------|----------|-------|
+| `DATABASE_URL` | realista-api | Automática (Railway PostgreSQL plugin) |
+| `OPENROUTER_API_KEY` | realista-api | Tu API key de OpenRouter |
+| `FRONTEND_URL` | realista-api | `https://realista.up.railway.app` |
+| `NODE_ENV` | realista-api | `production` |
+| `REALISTA_USER_AGENT` | realista-api | `Realista/1.0 (analizador educativo)` |
+| `PLAYWRIGHT_ENABLED` | realista-api | `false` |
+| `VITE_API_URL` | realista | `https://realista-api.up.railway.app` |
+
+#### Comandos de build y start
+
+**Backend (`realista-api`):**
+- Build: `npm install && npx prisma generate && cd backend && npm run build && npx prisma migrate deploy`
+- Start: `npm start -w backend`
+
+**Frontend (`realista`):**
+- Build: `npm install && cd frontend && npm run build`
+- Start: `node frontend/build/index.js`
+
+#### Pasos para desplegar
+
+1. Subir el repo a GitHub (rama `finalproject-DMM`)
+2. Crear proyecto en [Railway](https://railway.app) → "Deploy from GitHub repo"
+3. Añadir PostgreSQL plugin
+4. Crear servicio `realista-api` (Node.js):
+   - Build: `npm install && npx prisma generate && cd backend && npm run build && npx prisma migrate deploy`
+   - Start: `npm start -w backend`
+   - Variables: `OPENROUTER_API_KEY`, `FRONTEND_URL=https://realista.up.railway.app`, `NODE_ENV=production`, `PLAYWRIGHT_ENABLED=false`
+5. Crear servicio `realista` (Node.js):
+   - Build: `npm install && cd frontend && npm run build`
+   - Start: `node frontend/build/index.js`
+   - Variables: `VITE_API_URL=https://realista-api.up.railway.app`
+6. Railway asigna URLs automáticamente. Cada push a la rama conectada redeployea ambos servicios.
+
+> **Nota:** Playwright está deshabilitado en Railway. Los portales con DataDome (Idealista, Fotocasa) requerirán pegar el texto del anuncio manualmente. Para desarrollo local con Playwright, `PLAYWRIGHT_ENABLED=true` en `.env` y `npx playwright install chromium`.
 
 ---
 
@@ -530,14 +591,13 @@ erDiagram
 
 | Método | Endpoint | Descripción |
 |--------|----------|-------------|
-| GET | `/api/listings` | Lista todos los listings analizados de la sesión |
 | GET | `/api/listings/:id` | Detalle de un listing con diff vs snapshot anterior |
-| PATCH | `/api/purchase-processes/:id` | Actualiza proceso (status, financialProfile, currentStage, propertyPrice) |
 | GET | `/api/purchase-processes/:id` | Detalle del proceso con listings y checklist |
-| PATCH | `/api/checklist/:processId/items/:itemId` | Toggle completado de un ítem del checklist |
+| PATCH | `/api/purchase-processes/:id` | Actualiza proceso (status, financialProfile, currentStage, propertyPrice) |
+| GET | `/api/checklist/process/:processId` | Obtiene el checklist documental por etapa |
+| PATCH | `/api/checklist/items/:itemId` | Toggle completado de un ítem del checklist |
 | GET | `/api/admin/portal-health` | Estado de salud de portales inmobiliarios (FR-027) |
-| GET | `/api/session` | Obtener/crear UUID de sesión |
-| GET | `/api/health` | Health check para CI/CD |
+| GET | `/health` | Health check para CI/CD |
 
 > Para la especificación completa con todos los payloads, ver `specs/001-realista-mvp/contracts/api.md`
 
@@ -588,23 +648,13 @@ Criterios de aceptación:
 
 ---
 
-**Historia de Usuario 5 — Cronograma Interactivo: Saber Qué Viene Después (P3, Should-Have)**
+**Historia de Usuario 5 — Proceso de Compra: Cronograma + Checklist Unificado (P3, Should-Have)**
 
-Como comprador primerizo, quiero ver una línea temporal del proceso de compra para entender qué pasa en cada etapa y cuándo.
-
-Criterios de aceptación:
-1. Cuando abro la página del cronograma, entonces veo una línea temporal visual con hitos desde arras hasta escritura, con duraciones estimadas
-2. Cuando pulso un hito, entonces veo información detallada (qué pasa, documentos necesarios, duración típica)
-
----
-
-**Historia de Usuario 6 — Checklist Documental: Que No Se Te Escape Nada (P3, Should-Have)**
-
-Como comprador primerizo, quiero hacer seguimiento de qué documentos tengo y qué me falta para cada etapa del proceso.
+Como comprador primerizo, quiero ver una línea temporal del proceso de compra con los documentos que necesito en cada etapa para no perderme en el papeleo.
 
 Criterios de aceptación:
-1. Cuando abro el checklist, los ítems se agrupan por etapa con un porcentaje de progreso por etapa
-2. Cuando marco un ítem como completado, el porcentaje se actualiza y el estado persiste entre sesiones
+1. Cuando abro la página del proceso de compra, entonces veo una línea temporal visual con hitos desde arras hasta escritura, con duraciones estimadas y los documentos necesarios anidados en cada etapa
+2. Cuando marco un ítem como completado, el porcentaje de progreso se actualiza instantáneamente y el estado persiste entre sesiones
 3. Cuando completo todos los ítems de una etapa, la UI sugiere avanzar a la siguiente etapa del proceso
 
 ---
@@ -686,7 +736,7 @@ Criterios de aceptación:
 
 **Descripción:** Esta PR añade todos los artefactos de la fase de planificación de Realista: el plan de implementación con la arquitectura hexagonal + DDD y stack SvelteKit/Express/Prisma; el documento de investigación con 7 decisiones técnicas justificadas (OpenRouter, Cheerio, PWA, sesiones, etc.); el modelo de datos con el schema Prisma y value objects del dominio; los contratos de la API REST; y una guía de quickstart para setup y validación. Verifica el cumplimiento de los 6 principios de la constitución del proyecto.
 
-**Relación con historias de usuario:** Soporta las 6 historias (US1–US6) sentando las bases arquitectónicas, de datos y de API.
+**Relación con historias de usuario:** Soporta las 5 historias (US1–US5) sentando las bases arquitectónicas, de datos y de API.
 
 **Impacto:** Solo se añaden archivos nuevos — no hay cambios en código de producción. La constitución de 6 principios se valida contra el diseño propuesto.
 
@@ -700,7 +750,7 @@ Criterios de aceptación:
 
 **Hash de commit:** `a8fd5d7` (versión original de 91 tareas, ampliada a 127 en commits posteriores con T023a-f, T030a-b, T032a-d → T032a-b (Vision eliminado), T037a-f, T042a, T050a-e, T057a, T058a, T066a-i (Negotiation Assistant), T033a (AI Reasoning), T062a-c (UX polish), T070a-f, T087a, T091a, T091b para cubrir críticos, importantes, menores del review y el nuevo US-04)
 
-**Descripción:** Esta PR genera el desglose completo de tareas (`specs/001-realista-mvp/tasks.md`) con 127 tareas distribuidas en 9 fases: Setup, Foundational, US1 Listing Lens, US2 Mortgage Compass, US3 Dashboard, US4 Negotiation Assistant, US5 Timeline, US6 Checklist y Polish. Cada historia de usuario incluye sus tests primero (TDD, ~25 tareas de test tras las ampliaciones), seguidos de la implementación. Las tareas están etiquetadas con `[P]` para paralelización y `[US1]`–`[US6]` para trazabilidad con las historias.
+**Descripción:** Esta PR genera el desglose completo de tareas (`specs/001-realista-mvp/tasks.md`) con 127 tareas distribuidas en 9 fases: Setup, Foundational, US1 Listing Lens, US2 Mortgage Compass, US3 Dashboard, US4 Negotiation Assistant, US5 Proceso de Compra y Polish. Cada historia de usuario incluye sus tests primero (TDD, ~25 tareas de test tras las ampliaciones), seguidos de la implementación. Las tareas están etiquetadas con `[P]` para paralelización y `[US1]`–`[US5]` para trazabilidad con las historias.
 
 **Relación con historias de usuario:** Trazabilidad directa — cada tarea está mapeada a una historia específica.
 
@@ -734,7 +784,7 @@ Criterios de aceptación:
 
 **Descripción:** Esta PR contiene el MVP funcional completo de Realista con 236 archivos (+33,290 líneas). Incluye backend hexagonal (Express + TypeScript + Prisma), frontend SvelteKit PWA con 6 páginas, base de datos PostgreSQL con 8 modelos y 2 migraciones, y suites de tests unitarios (64 backend + 14 frontend) y E2E (7 tests Playwright). CI/CD operativo con GitHub Actions. Features: Listing Lens con streaming SSE y diff de re-análisis, Mortgage Compass con gráficos de amortización vs inversión, Dashboard con vista agregada, Negotiation Assistant, Timeline interactiva y Checklist documental. Documentación de uso de IA ampliada en `prompts.md` (sección 9: AI Engineering).
 
-**Relación con historias de usuario:** US1 (Listing Lens), US2 (Mortgage Compass), US3 (Dashboard), US4 (Negotiation Assistant), US5 (Timeline), US6 (Checklist) — todas implementadas.
+**Relación con historias de usuario:** US1 (Listing Lens), US2 (Mortgage Compass), US3 (Dashboard), US4 (Negotiation Assistant), US5 (Proceso de Compra) — todas implementadas.
 
 **Impacto:** Primera entrega de código funcional. Todas las fases de `tasks.md` (1-9) completadas.
 
@@ -821,35 +871,52 @@ node .opencode/hooks/scripts/regenerate-evidence-index.js
 cat .opencode/harness/README.md
 ```
 
-### 8.6. Estructura del código generado en Entrega 2
+### 8.6. Estructura del código final
 
 ```
 .
-├── .opencode/                  # ← Componentes de IA (este sprint)
-├── backend/                    # ← Scaffold Express + Prisma + Hexagonal
+├── .opencode/                  # ← Componentes de IA (4 agentes, 6 skills, 8 comandos, 4 hooks, 3 playbooks)
+├── backend/                    # ← Express + Prisma + Hexagonal (MVP completo)
 │   ├── src/
-│   │   ├── domain/             # 6 aggregates, 7 VOs, 5 ports, 9 services
-│   │   ├── adapters/           # 7 adaptadores (openrouter, cheerio, etc.)
+│   │   ├── domain/             # 6 aggregates, 8 VOs, 7 ports, 13 services
+│   │   ├── adapters/           # 8 adaptadores (openrouter, cheerio, playwright, catastro, etc.)
 │   │   ├── api/                # 8 rutas, 3 middleware, progress emitter
-│   │   ├── infrastructure/     # Prisma, env config, urlValidator
+│   │   ├── infrastructure/     # Prisma, env config, repositories, urlValidator
 │   │   └── index.ts            # entry point
-│   ├── tests/unit/             # 8 archivos de test (value objects + services)
-│   └── prisma/schema.prisma    # 7 modelos + 2 enums
-├── frontend/                   # ← Scaffold SvelteKit PWA
-│   ├── src/routes/             # 5 páginas (dashboard, listing-lens, mortgage-compass, timeline, checklist)
-│   ├── src/lib/                # stores, api client, 4 componentes shared
-│   └── static/manifest.webmanifest
-├── e2e/                        # Playwright E2E (3 flows)
-├── docs/evidence/              # ← Self-documentation
-├── docs/superpowers/specs/     # Design docs (brainstorming)
+│   ├── tests/                  # 24 archivos de test (unitarios + integración + contrato)
+│   └── prisma/                 # schema (8 modelos + 3 enums) + 2 migraciones
+├── frontend/                   # ← SvelteKit PWA (MVP completo)
+│   ├── src/routes/             # 7 páginas con layout, tabs, y SPA navigation
+│   ├── src/lib/                # stores, api client (REST + SSE), 11 componentes
+│   └── static/                 # PWA manifest, icons, service worker
+├── e2e/                        # Playwright E2E (4 flows, 13 tests)
+├── docs/                       # Constitución, 7 ADRs, eventos de dominio, evidence
+├── specs/001-realista-mvp/     # Documentación SDD (spec, plan, model, research, tasks, contracts)
 ├── docker-compose.yml          # PostgreSQL 16 + Adminer
-├── .github/workflows/ci.yml    # Backend + Frontend + E2E
+├── .github/workflows/ci.yml    # CI/CD: lint → typecheck → test → coverage → hexagonal-check → E2E
 └── .env.example                # Variables de entorno completas
 ```
 
-### 8.7. Próximos pasos
+### 8.7. Estado final del proyecto
 
-- Implementar los 22 tests de cada US (T023-T127) en orden story-by-story
-- Activar el hook `post-commit` vía Husky (ver `.opencode/hooks/post-commit.md`)
-- Crear el primer PR `feature-entrega2-DMM-us1` cuando US1 esté completo
-- Generar el primer evidence file al cerrar T028 (TransparencyScore)
+- **127 tareas** completadas en 9 fases (tasks.md)
+- **5 historias de usuario** implementadas: Listing Lens, Mortgage Compass, Dashboard, Negotiation Assistant, Proceso de Compra (cronograma + checklist unificado)
+- **186 tests** pasando (122 backend + 51 frontend + 13 E2E)
+- **7 ADRs** documentando decisiones arquitectónicas
+- **CI/CD** operativo con GitHub Actions
+- **Despliegue** en Railway (backend + frontend + PostgreSQL)
+- **Tag de release:** `v1.0-final-DMM`
+
+---
+
+## 9. Capturas del sistema
+
+*(Mobile-first, 390×844, PWA instalable)*
+
+| Landing | Listing Lens | Dashboard |
+|---------|-------------|-----------|
+| ![Landing](screenshots/01-landing.png) | ![Listing Lens](screenshots/02-listing-lens.png) | ![Dashboard](screenshots/03-dashboard.png) |
+
+| Mortgage Compass | Proceso de compra |
+|------------------|-------------------|
+| ![Mortgage](screenshots/04-mortgage-compass.png) | ![Proceso](screenshots/05-proceso-compra.png) |

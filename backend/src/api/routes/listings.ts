@@ -10,9 +10,11 @@ import { BrowserPool } from '../../adapters/playwright/BrowserPool';
 import { realChromiumLauncher } from '../../adapters/playwright/realChromiumLauncher';
 import { ChainedFetchAdapter } from '../../adapters/fetch/ChainedFetchAdapter';
 import { OpenRouterAdapter } from '../../adapters/openrouter/OpenRouterAdapter';
+import { OpenCodeGoAdapter } from '../../adapters/opencode-go/OpenCodeGoAdapter';
 import { CatastroAdapter } from '../../adapters/catastro/CatastroAdapter';
 import { AnalyzedListingRepository } from '../../infrastructure/repositories/AnalyzedListingRepository';
 import { ChecklistRepository } from '../../infrastructure/repositories/ChecklistRepository';
+import { PurchaseProcessRepository } from '../../infrastructure/repositories/PurchaseProcessRepository';
 import { prisma } from '../../infrastructure/prisma/client';
 import { validateListingUrl, UrlValidationError } from '../../infrastructure/utils/urlValidator';
 import { InvalidUrlError } from '../../domain/errors/DomainError';
@@ -39,15 +41,17 @@ const playwright = env.PLAYWRIGHT_ENABLED
 const fetcher = playwright
   ? new ChainedFetchAdapter([cheerio, playwright])
   : cheerio;
-const openrouter = new OpenRouterAdapter();
+const analyzer = env.LLM_PROVIDER === 'opencode-go'
+  ? new OpenCodeGoAdapter()
+  : new OpenRouterAdapter();
 const catastro = new CatastroAdapter();
 const locationResolver = new LocationResolver();
-const autoAttach = new AutoAttachService();
+const autoAttach = new AutoAttachService(new PurchaseProcessRepository(prisma));
 const repository = new AnalyzedListingRepository(prisma);
 const checklistRepository = new ChecklistRepository(prisma);
 const analyzeUseCase = new AnalyzeListingUseCase(
   fetcher,
-  openrouter,
+  analyzer,
   locationResolver,
   catastro,
   autoAttach,

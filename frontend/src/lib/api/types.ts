@@ -89,26 +89,25 @@ export interface TimelineMilestone {
   documentsNeeded: string[];
 }
 
-export type AmortizationScenarioName = 'baseline' | 'light' | 'moderate' | 'aggressive';
-export type InvestmentScenarioName = 'conservative' | 'moderate' | 'aggressive';
-export type Persona = 'conservador' | 'equilibrado' | 'arriesgado';
-
 export interface AmortizationScenario {
-  name: AmortizationScenarioName;
+  name: string;
   monthlyPayment: number;
   totalPaid: number;
   totalInterest: number;
   yearsToPayoff: number;
+  yearsReduced: number;
   monthlyExtra: number;
 }
 
 export interface InvestmentScenario {
-  name: InvestmentScenarioName;
+  name: string;
   annualReturn: number;
   nominalValue: number;
   realValue: number;
   totalContributed: number;
 }
+
+export type Persona = 'conservador' | 'equilibrado' | 'arriesgado';
 
 export interface HiddenCostItem {
   concept: string;
@@ -129,6 +128,7 @@ export interface ComputedMortgage {
   hiddenCosts: HiddenCosts;
   totalCash: number;
   gap: number;
+  loanAmount: number;
   monthlyPayment30yr: number;
   amortizationScenarios: AmortizationScenario[];
   investmentScenarios: InvestmentScenario[];
@@ -147,6 +147,9 @@ export interface PurchaseProcessDetail {
     region: string;
     persona?: Persona;
     interestRate?: number;
+    isFirstHome?: boolean;
+    buyerAge?: number | null;
+    isProtectedHousing?: boolean;
   } | null;
   computed: ComputedMortgage | null;
   createdAt: string;
@@ -164,14 +167,14 @@ export interface NegotiationPoint {
 }
 
 export type ListingDiff =
-  | { unchanged: true; addedRedFlags: NegotiationPoint[]; removedRedFlags: NegotiationPoint[] }
+  | { unchanged: true; addedRedFlags: RedFlagItem[]; removedRedFlags: RedFlagItem[] }
   | {
       unchanged: false;
       priceDelta?: number;
       squareMetersDelta?: number;
       yearBuiltChanged?: boolean;
-      addedRedFlags: NegotiationPoint[];
-      removedRedFlags: NegotiationPoint[];
+      addedRedFlags: RedFlagItem[];
+      removedRedFlags: RedFlagItem[];
     };
 
 export type ProgressEventName =

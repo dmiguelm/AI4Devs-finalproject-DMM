@@ -1,10 +1,30 @@
 <script lang="ts">
+  import { goto } from '$app/navigation';
+  import { apiClient } from '$lib/api/client';
+  import { lastAnalysis } from '$lib/stores/lastAnalysis';
+  import { financialProfile } from '$lib/stores/financialProfile';
+
+  let deleting = false;
+
+  async function startNewProcess() {
+    deleting = true;
+    try {
+      await apiClient.delete('/api/purchase-processes/active');
+    } catch {
+      // non-blocking: navigate anyway
+    }
+    lastAnalysis.clear();
+    financialProfile.reset();
+    goto('/listing-lens');
+  }
 </script>
 
 <section class="hero">
   <h1>Compra una casa<br />con los ojos abiertos</h1>
   <p class="sub">Pega el texto del anuncio y te contamos lo que no dice. Simula tu hipoteca y descubre los costes ocultos.</p>
-  <a href="/listing-lens" class="btn-primary cta">Analizar un anuncio</a>
+  <button class="btn-primary cta" on:click={startNewProcess} disabled={deleting}>
+    {deleting ? 'Preparando...' : 'Analizar un anuncio'}
+  </button>
 </section>
 
 <style>

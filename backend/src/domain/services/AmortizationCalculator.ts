@@ -18,16 +18,25 @@ export class AmortizationCalculator {
     const totalPaid = actualPayment * monthsToPayoff;
     const totalInterest = totalPaid - input.principal;
     const yearsToPayoff = monthsToPayoff / MONTHS_PER_YEAR;
+    const yearsReduced = input.years - yearsToPayoff;
 
-    const name = this.scenarioName(input.monthlyExtra);
+    const name = this.formatName(input.monthlyExtra, basePayment);
     return {
       name,
       monthlyPayment: basePayment,
       totalPaid,
       totalInterest,
       yearsToPayoff,
+      yearsReduced,
       monthlyExtra: input.monthlyExtra,
     };
+  }
+
+  private formatName(extra: number, basePayment: number): string {
+    if (extra === 0) return 'Sin amortizar';
+    const cuotas = Math.round((extra * MONTHS_PER_YEAR) / basePayment);
+    if (cuotas <= 0) return `+${extra}€/mes`;
+    return `${cuotas} cuota${cuotas > 1 ? 's' : ''} extra/año (+${extra}€/mes)`;
   }
 
   generateAllScenarios(input: Omit<AmortizationInput, 'monthlyExtra'>): AmortizationScenario[] {
@@ -49,12 +58,5 @@ export class AmortizationCalculator {
     if (monthlyRate === 0) return Math.ceil(principal / payment);
     const months = -Math.log(1 - (principal * monthlyRate) / payment) / Math.log(1 + monthlyRate);
     return Math.min(Math.ceil(months), cap);
-  }
-
-  private scenarioName(extra: number): AmortizationScenario['name'] {
-    if (extra === 0) return 'baseline';
-    if (extra <= 150) return 'light';
-    if (extra <= 400) return 'moderate';
-    return 'aggressive';
   }
 }

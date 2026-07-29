@@ -7,6 +7,7 @@ export default defineConfig({
   resolve: {
     alias: {
       $lib: resolve(__dirname, 'src/lib'),
+      '$app/navigation': resolve(__dirname, 'tests/unit/mocks/navigation.ts'),
     },
   },
   test: {
@@ -14,5 +15,16 @@ export default defineConfig({
     include: ['tests/unit/**/*.test.ts'],
     setupFiles: ['./tests/unit/setup.ts'],
     environment: 'happy-dom',
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'html', 'lcov'],
+      include: ['src/lib/**'],
+      thresholds: {
+        lines: 50,
+        branches: 50,
+        functions: 50,
+        statements: 50,
+      },
+    },
   },
 });
